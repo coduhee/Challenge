@@ -18,20 +18,20 @@ final class SearchRepository: SearchRepositoryType {
     }
     
     
-    // MARK: - fetchMusic
-    func fetchMusic(term: String) -> Single<[ContentItem]> {
-        // API Endpoint 이용해서 url 생성하기
-        guard let url = APIEndpoint.search(term: term, media: "music") else {
-            return .error(NSError(domain: "InvalidURL", code: -1))
-        }
-        
-        // NetworkManager로 요청을 보내 데이터를 받아옴
-        return networkManager.request(url)
-            .map { (response: ItunesResponseDTO) in
-                // DTO -> entity로 바꿔줌
-                response.results.map { $0.toEntity(mediaType: .music) }
-            }
-    }
+//    // MARK: - fetchMusic
+//    func fetchMusic(term: String) -> Single<[ContentItem]> {
+//        // API Endpoint 이용해서 url 생성하기
+//        guard let url = APIEndpoint.search(term: term, media: "music") else {
+//            return .error(NSError(domain: "InvalidURL", code: -1))
+//        }
+//        
+//        // NetworkManager로 요청을 보내 데이터를 받아옴
+//        return networkManager.request(url)
+//            .map { (response: ItunesResponseDTO) in
+//                // DTO -> entity로 바꿔줌
+//                response.results.map { $0.toEntity(mediaType: .music) }
+//            }
+//    }
     
     
     // MARK: - fetchContent

@@ -18,10 +18,10 @@ final class FetchHomeContentUseCase {
     
     // 계절별로 동시에(zip) 데이터 호출
     func execute() -> Single<[HomeSection]> {
-        let spring = repository.fetchMusic(term: "봄")
-        let summer = repository.fetchMusic(term: "여름")
-        let autumn = repository.fetchMusic(term: "가을")
-        let winter = repository.fetchMusic(term: "겨울")
+        let spring = repository.fetchContent(term: "봄", mediaType: .music)
+        let summer = repository.fetchContent(term: "여름", mediaType: .music)
+        let autumn = repository.fetchContent(term: "가을", mediaType: .music)
+        let winter = repository.fetchContent(term: "겨울", mediaType: .music)
         
         return Single.zip(spring, summer, autumn, winter) { springItems, summerItems, autumnItems, winterItems in
             return [
