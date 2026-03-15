@@ -12,7 +12,7 @@ import Kingfisher
 
 final class CardCollectionViewCell: UICollectionViewCell {
     
-    static let identifier = "HomeCollectionViewCell"
+    static let identifier = "CardCollectionViewCell"
     
     
     // MARK: - UI Components
@@ -102,7 +102,11 @@ final class CardCollectionViewCell: UICollectionViewCell {
     }
 }
 
-
+@available (iOS 17.0, *)
 #Preview {
+    let networkManager = NetworkManager()
+    let repository = SearchRepository(networkManager: networkManager)
+    let useCase = FetchHomeContentUseCase(repository: repository)
+    let reactor = HomeReactor(fetchHomeContentsUseCase: useCase)
     HomeViewController(reactor: reactor)
 }
