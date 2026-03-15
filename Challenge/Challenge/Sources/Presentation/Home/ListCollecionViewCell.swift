@@ -86,7 +86,8 @@ final class ListCollectionViewCell: UICollectionViewCell {
         [titleLabel, subtitleLabel].forEach { textStackView.addArrangedSubview($0) }
         
         containerView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.leading.equalToSuperview().inset(-10)
+            $0.top.bottom.trailing.equalToSuperview()
         }
         
         imageView.snp.makeConstraints {
@@ -109,7 +110,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
         
         separatorView.snp.makeConstraints {
             $0.bottom.equalToSuperview()
-            $0.trailing.equalToSuperview()
+            $0.trailing.equalToSuperview().inset(10)
             $0.height.equalTo(0.7)
             $0.leading.equalTo(imageView.snp.trailing).offset(10)
         }
