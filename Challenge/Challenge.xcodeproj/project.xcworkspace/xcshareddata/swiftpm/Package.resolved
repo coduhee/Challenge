@@ -1,5 +1,5 @@
 {
-  "originHash" : "691fad5401065addc01259afea1d7eb5bdb6bd1d73c90be7a7679a06ee827f48",
+  "originHash" : "458bb756132a5cda5d24c594547b34121a976ea07cb886586f44ab2a2ba1345d",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -8,6 +8,24 @@
       "state" : {
         "revision" : "3f99050e75bbc6fe71fc323adabb039756680016",
         "version" : "5.11.1"
+      }
+    },
+    {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher.git",
+      "state" : {
+        "revision" : "c92b84898e34ab46ff0dad86c02a0acbe2d87008",
+        "version" : "8.8.0"
+      }
+    },
+    {
+      "identity" : "reactorkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ReactorKit/ReactorKit",
+      "state" : {
+        "revision" : "8fa33f09c6f6621a2aa536d739956d53b84dd139",
+        "version" : "3.2.0"
       }
     },
     {
@@ -35,6 +53,15 @@
       "state" : {
         "revision" : "d41ef523faef0f911369f79c0b96815d9dbb6d7a",
         "version" : "3.0.0"
+      }
+    },
+    {
+      "identity" : "weakmaptable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ReactorKit/WeakMapTable.git",
+      "state" : {
+        "revision" : "cb05d64cef2bbf51e85c53adee937df46540a74e",
+        "version" : "1.2.1"
       }
     }
   ],
