@@ -11,6 +11,7 @@ import Then
 import RxSwift
 import RxCocoa
 import ReactorKit
+import RxDataSources
 
 final class HomeViewController: UIViewController, View {
     
@@ -19,6 +20,62 @@ final class HomeViewController: UIViewController, View {
     
     // MARK: - Properties
     private var sections: [HomeSection] = []
+    
+    
+    // MARK: - RxDataSources
+    private let dataSource = RxCollectionViewSectionedReloadDataSource<HomeSection>(
+        
+        // MARK: - 기존 cellForItemAt
+        configureCell: { dataSource, collectionView, indexPath, item in
+            
+            // MARK:  첫 번째 섹션(봄) 일 때 -> 리스트형 셀 사용
+            if indexPath.section == 0 {
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ListCollectionViewCell.identifier, for: indexPath) as? ListCollectionViewCell else {
+                    return UICollectionViewCell()
+                }
+                
+                // 구분선 삽입 로직
+                // 1) 3으로 나눈게 2인 경우
+                let isThirdIncolumn = (indexPath.item % 3) == 2
+                
+                // 2) 마지막 아이템인 경우
+                let isLastItem = indexPath.item == (dataSource.sectionModels[indexPath.section].items.count - 1)
+                
+                // 둘중에 하나라도 해당되면 선 숨기기
+                let shouldHideSeparator = isThirdIncolumn || isLastItem
+                
+                cell.configure(with: item, rank: indexPath.item + 1, hideSeparator: shouldHideSeparator)
+                return cell
+                
+            // MARK: 나머지 섹션 (여름, 가을, 겨울) 일 때 -> 카드형 셀 사용
+            } else {
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CardCollectionViewCell.identifier, for: indexPath) as? CardCollectionViewCell else {
+                    return UICollectionViewCell()
+                }
+                
+                cell.configure(with: item)
+                return cell
+            }
+        },
+        
+        // MARK: - 기존 viewForSupplementaryElementOfKind
+        configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
+            
+            guard kind == UICollectionView.elementKindSectionHeader,
+                  let header = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: HomeSectionHeaderView.identifier,
+                    for: indexPath
+                  ) as? HomeSectionHeaderView else {
+                return UICollectionReusableView()
+            }
+            
+            let sectionTitle = dataSource.sectionModels[indexPath.section].title
+            
+            header.configure(title: sectionTitle)
+            return header
+        }
+    )
     
     
     // MARK: - UI Components
@@ -159,7 +216,6 @@ final class HomeViewController: UIViewController, View {
     // MARK: - configureCollectionView
     private func configureCollectionView() {
         collectionView.delegate = self
-        collectionView.dataSource = self
         
         collectionView.register(CardCollectionViewCell.self, forCellWithReuseIdentifier: CardCollectionViewCell.identifier)
         
@@ -185,14 +241,8 @@ final class HomeViewController: UIViewController, View {
         reactor.state
             .map(\.sections)
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] sections in
-                guard let self else { return }
-                
-                self.sections = sections // 빈 배열에 새로 도착한 데이터 채우기
-                // 컬렉션 뷰 새로고침
-                self.collectionView.reloadData()
-                self.collectionView.collectionViewLayout.invalidateLayout()
-            })
+            // 받아온 섹션 데이터를 통째로 dataSource에게 너미기
+            .bind(to: collectionView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
         // loading 상태 바인딩
@@ -219,73 +269,6 @@ final class HomeViewController: UIViewController, View {
 
 
 // MARK: - Extension
-
-// MARK: -- UICollectionView 데이터 소스
-extension HomeViewController: UICollectionViewDataSource {
-    // 섹션 (봄, 여름, 가을, 겨울) 개수
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return sections.count
-    }
-    
-    // 아이템(계절당) 개수
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return sections[section].items.count
-    }
-    
-    // 어떤 디자인, 어떤 데이터 넣을지
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let item = sections[indexPath.section].items[indexPath.item]
-        
-        // MARK:  첫 번째 섹션(봄) 일 때 -> 리스트형 셀 사용
-        if indexPath.section == 0 {
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ListCollectionViewCell.identifier, for: indexPath) as? ListCollectionViewCell else {
-                return UICollectionViewCell()
-            }
-            
-            // 구분선 삽입
-            // 1) 3으로 나눈게 2인 경우
-            let isThirdIncolumn = (indexPath.item % 3) == 2
-            
-            // 2) 마지막 아이템인 경우
-            let isLastItem = indexPath.item == (sections[indexPath.section].items.count - 1)
-            
-            // 둘중에 하나라도 해당되면 선 숨기기
-            let shouldHideSeparator = isThirdIncolumn || isLastItem
-            
-            cell.configure(with: item, rank: indexPath.item + 1, hideSeparator: shouldHideSeparator)
-            return cell
-            
-        } else {
-            // 나머지 섹션 (여름, 가을, 겨울) 일 때 -> 카드형 셀 사용
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CardCollectionViewCell.identifier, for: indexPath) as? CardCollectionViewCell else {
-                return UICollectionViewCell()
-            }
-            
-            cell.configure(with: item)
-            return cell
-        }
-    }
-    
-    // 헤더 데이터 삽입
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        
-        guard kind == UICollectionView.elementKindSectionHeader,
-              let header = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: HomeSectionHeaderView.identifier,
-                for: indexPath
-              ) as? HomeSectionHeaderView else {
-            return UICollectionReusableView()
-        }
-        
-        let sectionTitle = sections[indexPath.section].title
-        
-        header.configure(title: sectionTitle)
-        return header
-    }
-}
-
 
 // MARK: -- UICollectionView 델리게이트
 extension HomeViewController: UICollectionViewDelegate { }
