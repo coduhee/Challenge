@@ -19,7 +19,7 @@ enum APIEndpoint {
             URLQueryItem(name: "term", value: term),
             URLQueryItem(name: "media", value: media),
             URLQueryItem(name: "country", value: "KR"),
-            URLQueryItem(name: "limit", value: "30")
+            URLQueryItem(name: "limit", value: "10")
         ]
         return components?.url
     }
