@@ -30,6 +30,8 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.font = .systemFont(ofSize: 18, weight: .semibold)
         $0.textColor = .label
         $0.textAlignment = .center
+        $0.setContentHuggingPriority(.required, for: .horizontal)
+        $0.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
     
     private let titleLabel = UILabel().then {
@@ -58,7 +60,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
-        configureUI()
+        setupUI()
     }
     
     @available(*, unavailable)
@@ -78,7 +80,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
     
     
     // MARK: - Layout
-    private func configureUI() {
+    private func setupUI() {
         contentView.addSubview(containerView)
         
         [imageView, rankLabel, textStackView, separatorView].forEach { containerView.addSubview($0) }
@@ -99,7 +101,6 @@ final class ListCollectionViewCell: UICollectionViewCell {
         rankLabel.snp.makeConstraints {
             $0.leading.equalTo(imageView.snp.trailing).offset(13)
             $0.centerY.equalToSuperview()
-            $0.width.equalTo(20)
         }
         
         textStackView.snp.makeConstraints {
@@ -119,18 +120,18 @@ final class ListCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Configure
     func configure(with item: ContentItem, rank: Int, hideSeparator: Bool) {
-        imageView.loadImage(from: item.imageURL)
-        
         rankLabel.text = "\(rank)"
         titleLabel.text = item.title
         subtitleLabel.text = item.subtitle
         
+        imageView.loadImage(from: item.imageURL)
+
         separatorView.isHidden = hideSeparator
     }
 }
 
 
-@available (iOS 17.0, *)
+@available(iOS 17.0, *)
 #Preview {
     let networkManager = NetworkManager()
     let repository = SearchRepository(networkManager: networkManager)

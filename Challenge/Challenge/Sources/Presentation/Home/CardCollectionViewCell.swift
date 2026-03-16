@@ -42,14 +42,13 @@ final class CardCollectionViewCell: UICollectionViewCell {
         $0.axis = .vertical
         $0.spacing = 2
         $0.alignment = .fill
-        $0.distribution = .fill
     }
     
     
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
-        configureUI()
+        setupUI()
     }
     
     @available(*, unavailable)
@@ -69,7 +68,7 @@ final class CardCollectionViewCell: UICollectionViewCell {
     
     
     // MARK: - Layout
-    private func configureUI() {
+    private func setupUI() {
         contentView.addSubview(containerView)
         
         [imageView, textStackView].forEach { containerView.addSubview($0) }
@@ -102,7 +101,8 @@ final class CardCollectionViewCell: UICollectionViewCell {
     }
 }
 
-@available (iOS 17.0, *)
+
+@available(iOS 17.0, *)
 #Preview {
     let networkManager = NetworkManager()
     let repository = SearchRepository(networkManager: networkManager)
@@ -110,3 +110,4 @@ final class CardCollectionViewCell: UICollectionViewCell {
     let reactor = HomeReactor(fetchHomeContentsUseCase: useCase)
     HomeViewController(reactor: reactor)
 }
+
