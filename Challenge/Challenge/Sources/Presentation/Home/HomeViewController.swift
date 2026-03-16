@@ -13,6 +13,7 @@ import RxCocoa
 import ReactorKit
 import RxDataSources
 
+
 final class HomeViewController: UIViewController, View {
     
     var disposeBag = DisposeBag()
@@ -117,8 +118,6 @@ final class HomeViewController: UIViewController, View {
         configureUI()
         configureCollectionView()
         configureSearchBar()
-        
-        reactor?.action.onNext(.viewDidLoad)
     }
     
     
@@ -173,6 +172,7 @@ final class HomeViewController: UIViewController, View {
                 // 2. Group
                 let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.85), heightDimension: .absolute(200))
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitem: item, count: 3) // 한 그룹에 아이템 3개 세로 배치
+                
                 group.interItemSpacing = .fixed(0)
                 
                 // 3. Section
@@ -235,6 +235,13 @@ final class HomeViewController: UIViewController, View {
     // MARK: - Bind
     func bind(reactor: HomeReactor) {
         
+        // MARK: View -> Reactor
+        // viewDidLoad
+        Observable.just(())
+            .map { Reactor.Action.viewDidLoad }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         
         // MARK: Reactor -> View
         // sections 상태 바인딩
@@ -288,7 +295,7 @@ extension HomeViewController: UISearchBarDelegate {
 }
 
 
-@available (iOS 17.0, *)
+@available(iOS 17.0, *)
 #Preview {
     let networkManager = NetworkManager()
     let repository = SearchRepository(networkManager: networkManager)
@@ -296,3 +303,4 @@ extension HomeViewController: UISearchBarDelegate {
     let reactor = HomeReactor(fetchHomeContentsUseCase: useCase)
     HomeViewController(reactor: reactor)
 }
+
