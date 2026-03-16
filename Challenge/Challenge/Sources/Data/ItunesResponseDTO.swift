@@ -20,8 +20,9 @@ struct ItunesItemDTO: Decodable {
     let collectionName: String?
     let artistName: String?
     let artworkUrl100: String?
-    var artworkUrl600: String? {
-        return artworkUrl100?.replacingOccurrences(of: "100x100", with: "600x600")
+    let artworkUrl60: String?
+    var artworkUrl200: String? {
+        return artworkUrl100?.replacingOccurrences(of: "100x100", with: "200x200")
     }
     let longDescription: String?
     let shortDescription: String?
@@ -36,7 +37,7 @@ extension ItunesItemDTO {
             id: trackId ?? collectionId ?? 0,
             title: trackName ?? collectionName ?? "제목 없음",
             subtitle: artistName ?? "아티스트 없음",
-            imageURL: artworkUrl600 ?? "",
+            imageURL: artworkUrl200 ?? artworkUrl100 ?? artworkUrl60 ?? "",
             description: longDescription ?? shortDescription ?? primaryGenreName ?? "설명 없음",
             mediaType: mediaType
         )
