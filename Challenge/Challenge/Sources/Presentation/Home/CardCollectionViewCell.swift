@@ -22,7 +22,7 @@ final class CardCollectionViewCell: UICollectionViewCell {
     
     private let imageView = UIImageView().then {
         $0.contentMode = .scaleAspectFill
-        $0.layer.cornerRadius = 10
+        $0.layer.cornerRadius = 8
         $0.clipsToBounds = true
     }
     
@@ -40,7 +40,7 @@ final class CardCollectionViewCell: UICollectionViewCell {
     
     private let textStackView = UIStackView().then {
         $0.axis = .vertical
-        $0.spacing = 2
+        $0.spacing = 1
         $0.alignment = .fill
     }
     
@@ -100,14 +100,3 @@ final class CardCollectionViewCell: UICollectionViewCell {
         imageView.loadImage(from: item.imageURL)
     }
 }
-
-
-@available(iOS 17.0, *)
-#Preview {
-    let networkManager = NetworkManager()
-    let repository = SearchRepository(networkManager: networkManager)
-    let useCase = FetchHomeContentUseCase(repository: repository)
-    let reactor = HomeReactor(fetchHomeContentsUseCase: useCase)
-    HomeViewController(reactor: reactor)
-}
-

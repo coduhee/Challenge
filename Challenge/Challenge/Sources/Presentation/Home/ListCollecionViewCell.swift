@@ -22,12 +22,12 @@ final class ListCollectionViewCell: UICollectionViewCell {
     
     private let imageView = UIImageView().then {
         $0.contentMode = .scaleAspectFill
-        $0.layer.cornerRadius = 10
+        $0.layer.cornerRadius = 8
         $0.clipsToBounds = true
     }
     
     private let rankLabel = UILabel().then {
-        $0.font = .systemFont(ofSize: 18, weight: .semibold)
+        $0.font = .systemFont(ofSize: 18, weight: .bold)
         $0.textColor = .label
         $0.textAlignment = .center
         $0.setContentHuggingPriority(.required, for: .horizontal)
@@ -35,7 +35,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
     }
     
     private let titleLabel = UILabel().then {
-        $0.font = .systemFont(ofSize: 17)
+        $0.font = .systemFont(ofSize: 16)
         $0.textColor = .label
         $0.numberOfLines = 1
     }
@@ -48,7 +48,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
     
     private let textStackView = UIStackView().then {
         $0.axis = .vertical
-        $0.spacing = 2
+        $0.spacing = 1
         $0.alignment = .leading
     }
     
@@ -95,7 +95,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
         imageView.snp.makeConstraints {
             $0.leading.equalToSuperview()
             $0.centerY.equalToSuperview()
-            $0.width.height.equalTo(60)
+            $0.width.height.equalTo(55)
         }
         
         rankLabel.snp.makeConstraints {
@@ -128,14 +128,4 @@ final class ListCollectionViewCell: UICollectionViewCell {
 
         separatorView.isHidden = hideSeparator
     }
-}
-
-
-@available(iOS 17.0, *)
-#Preview {
-    let networkManager = NetworkManager()
-    let repository = SearchRepository(networkManager: networkManager)
-    let useCase = FetchHomeContentUseCase(repository: repository)
-    let reactor = HomeReactor(fetchHomeContentsUseCase: useCase)
-    HomeViewController(reactor: reactor)
 }

@@ -6,16 +6,16 @@
 //
  
 import Foundation
+import UIKit
 import RxSwift
 import ReactorKit
-import UIKit
 
 final class HomeReactor: Reactor {
     
     
     // MARK: - Action
     enum Action {
-        case viewDidLoad
+        case fetchData
     }
     
     
@@ -36,21 +36,20 @@ final class HomeReactor: Reactor {
     
     
     // MARK: - Properties
-    let initialState: State
+    let initialState = State()
     private let fetchHomeContentsUseCase: FetchHomeContentUseCase
     
     
     // MARK: - Init
     init(fetchHomeContentsUseCase: FetchHomeContentUseCase) {
         self.fetchHomeContentsUseCase = fetchHomeContentsUseCase
-        self.initialState = State()
     }
     
     
     // MARK: - Mutate
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .viewDidLoad:
+        case .fetchData:
             return fetchHomeSections()
         }
     }
@@ -61,6 +60,7 @@ final class HomeReactor: Reactor {
         var newState = state
         
         switch mutation {
+            
         case .setLoading(let isLoading):
             newState.isLoading = isLoading
             
@@ -101,14 +101,4 @@ private extension HomeReactor {
                 .just(.setLoading(false))
         ])
     }
-}
-
-
-@available (iOS 17.0, *)
-#Preview {
-    let networkManager = NetworkManager()
-    let repository = SearchRepository(networkManager: networkManager)
-    let useCase = FetchHomeContentUseCase(repository: repository)
-    let reactor = HomeReactor(fetchHomeContentsUseCase: useCase)
-    HomeViewController(reactor: reactor)
 }
