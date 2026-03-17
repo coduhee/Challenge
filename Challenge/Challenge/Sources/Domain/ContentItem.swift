@@ -19,6 +19,6 @@ struct ContentItem {
 
 enum MediaType {
     case music
-    case movie
+    case musicVideo
     case podcast
 }

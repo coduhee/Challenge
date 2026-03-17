@@ -23,8 +23,8 @@ final class SearchRepository: SearchRepositoryType {
         switch mediaType {
         case .music:
             mediaString = "music"
-        case .movie:
-            mediaString = "movie"
+        case .musicVideo:
+            mediaString = "musicVideo"
         case .podcast:
             mediaString = "podcast"
         }
