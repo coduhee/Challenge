@@ -16,6 +16,7 @@ final class HomeReactor: Reactor {
     // MARK: - Action
     enum Action {
         case fetchData
+        case playMusic(String?)
     }
     
     
@@ -24,6 +25,7 @@ final class HomeReactor: Reactor {
         case setSections([HomeSection])
         case setLoading(Bool)
         case setErrorMessage(String?)
+        case setPlayingURL(String)
     }
     
     
@@ -32,6 +34,7 @@ final class HomeReactor: Reactor {
         var sections: [HomeSection] = []
         var isLoading: Bool = false
         @Pulse var errorMessage: String?
+        var playingURL: String?
     }
     
     
@@ -51,6 +54,13 @@ final class HomeReactor: Reactor {
         switch action {
         case .fetchData:
             return fetchHomeSections()
+        case .playMusic(let url):
+            guard let url = url, !url.isEmpty else {
+                // URL이 없으면 error 팝업
+                return .just(.setErrorMessage("미리듣기를 제공하지 않는 콘텐츠입니다."))
+            }
+            
+            return .just(.setPlayingURL(url))
         }
     }
     
@@ -69,6 +79,9 @@ final class HomeReactor: Reactor {
             
         case .setErrorMessage(let message):
             newState.errorMessage = message
+            
+        case .setPlayingURL(let url):
+            newState.playingURL = url
         }
         
         return newState

@@ -16,6 +16,7 @@ final class SearchReactor: Reactor {
     // MARK: - Action
     enum Action {
         case updateKeyword(String)
+        case playMusic(String?)
     }
     
     
@@ -23,6 +24,7 @@ final class SearchReactor: Reactor {
     enum Mutation {
         case setSections([HomeSection])
         case setErrorMessage(String?)
+        case setPlayingURL(String)
     }
     
     
@@ -30,6 +32,7 @@ final class SearchReactor: Reactor {
     struct State {
         var sections: [HomeSection] = []
         @Pulse var errorMessage: String?
+        var playingURL: String?
     }
     
     
@@ -55,6 +58,13 @@ final class SearchReactor: Reactor {
             }
             // 검색어가 있으면 API통신 시작
             return fetchSearchSections(keyword: keyword)
+            
+        case .playMusic(let url):
+            guard let url = url, !url.isEmpty else {
+                // URL이 없으면 error 팝업
+                return .just(.setErrorMessage("미리듣기를 제공하지 않는 콘텐츠입니다."))
+            }
+            return .just(.setPlayingURL(url))
         }
     }
     
@@ -70,6 +80,9 @@ final class SearchReactor: Reactor {
             
         case .setErrorMessage(let message):
             newState.errorMessage = message
+            
+        case .setPlayingURL(let url):
+            newState.playingURL = url
         }
         return newState
     }
