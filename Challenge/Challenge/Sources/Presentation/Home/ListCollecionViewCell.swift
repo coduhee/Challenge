@@ -52,6 +52,13 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.alignment = .leading
     }
     
+    private let ellipsisButton = UIImageView().then {
+        let config = UIImage.SymbolConfiguration(weight: .bold)
+        $0.image = UIImage(systemName: "ellipsis", withConfiguration: config)
+        $0.tintColor = .systemGray
+        $0.contentMode = .scaleAspectFit
+    }
+    
     private let separatorView = UIView().then {
         $0.backgroundColor = .systemGray5
     }
@@ -83,7 +90,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
     private func setupUI() {
         contentView.addSubview(containerView)
         
-        [imageView, rankLabel, textStackView, separatorView].forEach { containerView.addSubview($0) }
+        [imageView, rankLabel, textStackView, separatorView, ellipsisButton].forEach { containerView.addSubview($0) }
         
         [titleLabel, subtitleLabel].forEach { textStackView.addArrangedSubview($0) }
         
@@ -105,8 +112,13 @@ final class ListCollectionViewCell: UICollectionViewCell {
         
         textStackView.snp.makeConstraints {
             $0.leading.equalTo(rankLabel.snp.trailing).offset(13)
-            $0.trailing.equalToSuperview().inset(10)
+            $0.trailing.equalTo(ellipsisButton.snp.leading).inset(-10)
             $0.centerY.equalToSuperview()
+        }
+        
+        ellipsisButton.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalToSuperview().inset(20)
         }
         
         separatorView.snp.makeConstraints {
