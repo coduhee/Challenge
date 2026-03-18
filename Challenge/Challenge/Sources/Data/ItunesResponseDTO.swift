@@ -27,6 +27,7 @@ struct ItunesItemDTO: Decodable {
     let longDescription: String?
     let shortDescription: String?
     let primaryGenreName: String?
+    let previewUrl: String?
 }
 
 
@@ -39,7 +40,8 @@ extension ItunesItemDTO {
             subtitle: artistName ?? "아티스트 없음",
             imageURL: artworkUrl300 ?? artworkUrl100 ?? artworkUrl60 ?? "",
             description: longDescription ?? shortDescription ?? primaryGenreName ?? "설명 없음",
-            mediaType: mediaType
+            mediaType: mediaType,
+            previewURL: previewUrl
         )
     }
 }

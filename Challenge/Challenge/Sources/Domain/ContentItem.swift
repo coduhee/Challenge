@@ -15,6 +15,7 @@ struct ContentItem {
     let imageURL: String
     let description: String
     let mediaType: MediaType
+    let previewURL: String?
 }
 
 enum MediaType {
