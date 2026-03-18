@@ -12,7 +12,7 @@ import RxSwift
 import RxCocoa
 import ReactorKit
 import RxDataSources
-
+import AVFoundation
 
 final class HomeViewController: UIViewController, View {
     
@@ -22,6 +22,7 @@ final class HomeViewController: UIViewController, View {
     // MARK: - Properties
     private var sections: [HomeSection] = []
     private var searchViewController: UIViewController
+    
     
     // MARK: - UI Components
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
@@ -75,7 +76,7 @@ final class HomeViewController: UIViewController, View {
         configureUI()
         configureCollectionView()
     }
-    
+
     
     // MARK: - Layout
     private func configureUI() {
@@ -167,10 +168,9 @@ final class HomeViewController: UIViewController, View {
             }
         }
     }
-    
-    
+
     // MARK: - RxDataSources
-    private let dataSource = RxCollectionViewSectionedReloadDataSource<HomeSection>(
+    private lazy var dataSource = RxCollectionViewSectionedReloadDataSource<HomeSection>(
         
         // MARK: - 기존 cellForItemAt
         configureCell: { dataSource, collectionView, indexPath, item in
@@ -192,6 +192,8 @@ final class HomeViewController: UIViewController, View {
                 let shouldHideSeparator = isThirdIncolumn || isLastItem
                 
                 cell.configure(with: item, rank: indexPath.item + 1, hideSeparator: shouldHideSeparator)
+                
+                cell.updatePlayUI(isPlaying: item.previewURL == self.reactor?.currentState.playingURL)
                 return cell
                 
             // MARK: 나머지 섹션 (여름, 가을, 겨울) 일 때 -> 카드형 셀 사용
@@ -201,6 +203,8 @@ final class HomeViewController: UIViewController, View {
                 }
                 
                 cell.configure(with: item)
+                
+                cell.updatePlayUI(isPlaying: item.previewURL == self.reactor?.currentState.playingURL)
                 return cell
             }
         },
@@ -249,6 +253,13 @@ final class HomeViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         
+        // playAudio
+        collectionView.rx.modelSelected(ContentItem.self)
+            .map { Reactor.Action.playMusic($0.previewURL) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        
         // search
         guard let searchVC = searchController.searchResultsController as? SearchViewController,
         let searchReactor = searchVC.reactor else { return }
@@ -268,6 +279,7 @@ final class HomeViewController: UIViewController, View {
                 owner.searchController.searchBar.resignFirstResponder()
             }
             .disposed(by: disposeBag)
+        
         
         
         // MARK: - Reactor -> View
@@ -295,6 +307,31 @@ final class HomeViewController: UIViewController, View {
             .bind(with: self) { owner, message in
                 owner.showErrorAlert(message: message)
             }
+            .disposed(by: disposeBag)
+        
+        // 음악 재생 및 재생이미지
+        reactor.state.map(\.playingURL)
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] playingURL in
+                guard let self = self else { return }
+                
+                // 소리 켜기
+                if let urlString = playingURL, let url = URL(string: urlString) {
+                    AudioManager.shared.play(url: url)
+                }
+                
+                // 재생 이미지
+                for cell in self.collectionView.visibleCells {
+                    if let playableCell = cell as? PlayableUICell,
+                       let indexPath = self.collectionView.indexPath(for: cell),
+                       let item = self.dataSource[indexPath] as? ContentItem {
+                        
+                        let isPlaying = (item.previewURL == playingURL)
+                        playableCell.updatePlayUI(isPlaying: isPlaying)
+                    }
+                }
+            })
             .disposed(by: disposeBag)
     }
 }
