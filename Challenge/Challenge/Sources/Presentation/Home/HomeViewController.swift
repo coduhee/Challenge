@@ -21,8 +21,7 @@ final class HomeViewController: UIViewController, View {
     
     // MARK: - Properties
     private var sections: [HomeSection] = []
-    private var searchViewController: UIViewController
-    
+    private let searchController: UISearchController
     
     // MARK: - UI Components
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
@@ -38,29 +37,10 @@ final class HomeViewController: UIViewController, View {
         $0.isHidden = true
     }
     
-    private lazy var searchController: UISearchController = {
-        let repository = SearchRepository()
-        let searchUseCase = SearchUseCase(repository: repository)
-        let searchReactor = SearchReactor(searchUseCase: searchUseCase)
-        
-        let searchVC = SearchViewController()
-        
-        searchVC.reactor = searchReactor
-        
-        searchVC.loadViewIfNeeded()
-        
-        let controller = UISearchController(searchResultsController: searchVC)
-        controller.searchBar.placeholder = "M/V, music, podcast 검색"
-        controller.obscuresBackgroundDuringPresentation = false
-        controller.searchBar.autocorrectionType = .no // 자동완성 기능 off
-        controller.searchBar.returnKeyType = .search
-        return controller
-    }()
-    
     
     // MARK: - Init
-    init(reactor: HomeReactor, searchVC: SearchViewController) {
-        self.searchViewController = searchVC
+    init(reactor: HomeReactor, searchController: UISearchController) {
+        self.searchController = searchController
         super.init(nibName: nil, bundle: nil)
         self.reactor = reactor
     }
@@ -76,7 +56,7 @@ final class HomeViewController: UIViewController, View {
         configureUI()
         configureCollectionView()
     }
-
+    
     
     // MARK: - Layout
     private func configureUI() {
@@ -111,7 +91,7 @@ final class HomeViewController: UIViewController, View {
             
             // Header
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                heightDimension: .absolute(70)) // 헤더 높이
+                                                    heightDimension: .absolute(70)) // 헤더 높이
             let header = NSCollectionLayoutBoundarySupplementaryItem(
                 layoutSize: headerSize,
                 elementKind: UICollectionView.elementKindSectionHeader,
@@ -168,7 +148,7 @@ final class HomeViewController: UIViewController, View {
             }
         }
     }
-
+    
     // MARK: - RxDataSources
     private lazy var dataSource = RxCollectionViewSectionedReloadDataSource<HomeSection>(
         
@@ -196,7 +176,7 @@ final class HomeViewController: UIViewController, View {
                 cell.updatePlayUI(isPlaying: item.previewURL == self.reactor?.currentState.playingURL)
                 return cell
                 
-            // MARK: 나머지 섹션 (여름, 가을, 겨울) 일 때 -> 카드형 셀 사용
+                // MARK: 나머지 섹션 (여름, 가을, 겨울) 일 때 -> 카드형 셀 사용
             } else {
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CardCollectionViewCell.identifier, for: indexPath) as? CardCollectionViewCell else {
                     return UICollectionViewCell()
@@ -240,7 +220,7 @@ final class HomeViewController: UIViewController, View {
         // 헤더뷰 등록
         collectionView.register(HomeSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HomeSectionHeaderView.identifier)
     }
-
+    
     
     // MARK: - Bind
     func bind(reactor: HomeReactor) {
@@ -262,7 +242,7 @@ final class HomeViewController: UIViewController, View {
         
         // search
         guard let searchVC = searchController.searchResultsController as? SearchViewController,
-        let searchReactor = searchVC.reactor else { return }
+              let searchReactor = searchVC.reactor else { return }
         
         searchController.searchBar.rx.text.orEmpty
             .filter { !$0.isEmpty }
@@ -288,7 +268,7 @@ final class HomeViewController: UIViewController, View {
             .map(\.sections)
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
-            // 받아온 섹션 데이터를 통째로 dataSource에게 너미기
+        // 받아온 섹션 데이터를 통째로 dataSource에게 너미기
             .bind(to: collectionView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         

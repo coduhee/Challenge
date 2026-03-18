@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ReactorKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -16,6 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
+        // 의존성 생성
         let repository = SearchRepository()
         let fetchHomeContentsuseCase = FetchHomeContentUseCase(repository: repository)
         let homereactor = HomeReactor(fetchHomeContentsUseCase: fetchHomeContentsuseCase)
@@ -24,7 +26,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let searchReactor = SearchReactor(searchUseCase: searchUseCase)
         
         let searchVC = SearchViewController()
-        let homeVC = HomeViewController(reactor: homereactor, searchVC: searchVC)
+        searchVC.reactor = searchReactor
+        
+        let searchController = UISearchController(searchResultsController: searchVC)
+        searchController.searchBar.placeholder = "M/V, music, podcast 검색"
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.autocorrectionType = .no // 자동완성 기능 off
+        searchController.searchBar.returnKeyType = .search
+
+        
+        // 의존성 주입
+        let homeVC = HomeViewController(reactor: homereactor, searchController: searchController)
         
         let navigationController = UINavigationController(rootViewController: homeVC)
         
