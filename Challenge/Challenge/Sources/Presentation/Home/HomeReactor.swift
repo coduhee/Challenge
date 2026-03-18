@@ -31,7 +31,7 @@ final class HomeReactor: Reactor {
     struct State {
         var sections: [HomeSection] = []
         var isLoading: Bool = false
-        var errorMessage: String?
+        @Pulse var errorMessage: String?
     }
     
     
@@ -94,7 +94,7 @@ private extension HomeReactor {
                 }
                 .catch { error in
                     // 에러 발생시 에러 메세지 세팅
-                    return .just(.setErrorMessage(error.localizedDescription))
+                    return .just(.setErrorMessage(error.localizedDescription)) // 스트림이 박살났기때문에 .just
                 },
             
             // 3. 로딩 off
