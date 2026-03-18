@@ -21,63 +21,7 @@ final class HomeViewController: UIViewController, View {
     
     // MARK: - Properties
     private var sections: [HomeSection] = []
-    
-    
-    // MARK: - RxDataSources
-    private let dataSource = RxCollectionViewSectionedReloadDataSource<HomeSection>(
-        
-        // MARK: - 기존 cellForItemAt
-        configureCell: { dataSource, collectionView, indexPath, item in
-            
-            // MARK:  첫 번째 섹션(봄) 일 때 -> 리스트형 셀 사용
-            if indexPath.section == 0 {
-                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ListCollectionViewCell.identifier, for: indexPath) as? ListCollectionViewCell else {
-                    return UICollectionViewCell()
-                }
-                
-                // 구분선 삽입 로직
-                // 1) 3으로 나눈게 2인 경우
-                let isThirdIncolumn = (indexPath.item % 3) == 2
-                
-                // 2) 마지막 아이템인 경우
-                let isLastItem = indexPath.item == (dataSource.sectionModels[indexPath.section].items.count - 1)
-                
-                // 둘중에 하나라도 해당되면 선 숨기기
-                let shouldHideSeparator = isThirdIncolumn || isLastItem
-                
-                cell.configure(with: item, rank: indexPath.item + 1, hideSeparator: shouldHideSeparator)
-                return cell
-                
-            // MARK: 나머지 섹션 (여름, 가을, 겨울) 일 때 -> 카드형 셀 사용
-            } else {
-                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CardCollectionViewCell.identifier, for: indexPath) as? CardCollectionViewCell else {
-                    return UICollectionViewCell()
-                }
-                
-                cell.configure(with: item)
-                return cell
-            }
-        },
-        
-        // MARK: - 기존 viewForSupplementaryElementOfKind
-        configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
-            
-            guard kind == UICollectionView.elementKindSectionHeader,
-                  let header = collectionView.dequeueReusableSupplementaryView(
-                    ofKind: kind,
-                    withReuseIdentifier: HomeSectionHeaderView.identifier,
-                    for: indexPath
-                  ) as? HomeSectionHeaderView else {
-                return UICollectionReusableView()
-            }
-            
-            let sectionTitle = dataSource.sectionModels[indexPath.section].title
-            
-            header.configure(title: sectionTitle)
-            return header
-        }
-    )
-    
+    private var searchViewController: UIViewController
     
     // MARK: - UI Components
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
@@ -93,16 +37,29 @@ final class HomeViewController: UIViewController, View {
         $0.isHidden = true
     }
     
-    private let searchController = UISearchController(searchResultsController: nil).then {
-        $0.searchBar.placeholder = "영화, 팟캐스트 검색"
-        $0.obscuresBackgroundDuringPresentation = false
-        $0.searchBar.autocorrectionType = .no // 자동완성 기능 off
-        $0.searchBar.returnKeyType = .search
-    }
+    private lazy var searchController: UISearchController = {
+        let repository = SearchRepository()
+        let searchUseCase = SearchUseCase(repository: repository)
+        let searchReactor = SearchReactor(searchUseCase: searchUseCase)
+        
+        let searchVC = SearchViewController()
+        
+        searchVC.reactor = searchReactor
+        
+        searchVC.loadViewIfNeeded()
+        
+        let controller = UISearchController(searchResultsController: searchVC)
+        controller.searchBar.placeholder = "M/V, music, podcast 검색"
+        controller.obscuresBackgroundDuringPresentation = false
+        controller.searchBar.autocorrectionType = .no // 자동완성 기능 off
+        controller.searchBar.returnKeyType = .search
+        return controller
+    }()
     
     
     // MARK: - Init
-    init(reactor: HomeReactor) {
+    init(reactor: HomeReactor, searchVC: SearchViewController) {
+        self.searchViewController = searchVC
         super.init(nibName: nil, bundle: nil)
         self.reactor = reactor
     }
@@ -117,7 +74,6 @@ final class HomeViewController: UIViewController, View {
         
         configureUI()
         configureCollectionView()
-        configureSearchBar()
     }
     
     
@@ -170,7 +126,7 @@ final class HomeViewController: UIViewController, View {
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 // 2. Group
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.85), heightDimension: .absolute(200))
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.85), heightDimension: .absolute(190))
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitem: item, count: 3) // 한 그룹에 아이템 3개 세로 배치
                 
                 group.interItemSpacing = .fixed(0)
@@ -213,10 +169,65 @@ final class HomeViewController: UIViewController, View {
     }
     
     
+    // MARK: - RxDataSources
+    private let dataSource = RxCollectionViewSectionedReloadDataSource<HomeSection>(
+        
+        // MARK: - 기존 cellForItemAt
+        configureCell: { dataSource, collectionView, indexPath, item in
+            
+            // MARK:  첫 번째 섹션(봄) 일 때 -> 리스트형 셀 사용
+            if indexPath.section == 0 {
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ListCollectionViewCell.identifier, for: indexPath) as? ListCollectionViewCell else {
+                    return UICollectionViewCell()
+                }
+                
+                // 구분선 삽입 로직
+                // 1) 3으로 나눈게 2인 경우
+                let isThirdIncolumn = (indexPath.item % 3) == 2
+                
+                // 2) 마지막 아이템인 경우
+                let isLastItem = indexPath.item == (dataSource.sectionModels[indexPath.section].items.count - 1)
+                
+                // 둘중에 하나라도 해당되면 선 숨기기
+                let shouldHideSeparator = isThirdIncolumn || isLastItem
+                
+                cell.configure(with: item, rank: indexPath.item + 1, hideSeparator: shouldHideSeparator)
+                return cell
+                
+            // MARK: 나머지 섹션 (여름, 가을, 겨울) 일 때 -> 카드형 셀 사용
+            } else {
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CardCollectionViewCell.identifier, for: indexPath) as? CardCollectionViewCell else {
+                    return UICollectionViewCell()
+                }
+                
+                cell.configure(with: item)
+                return cell
+            }
+        },
+        
+        
+        // MARK: - 기존 viewForSupplementaryElementOfKind
+        configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
+            
+            guard kind == UICollectionView.elementKindSectionHeader,
+                  let header = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: HomeSectionHeaderView.identifier,
+                    for: indexPath
+                  ) as? HomeSectionHeaderView else {
+                return UICollectionReusableView()
+            }
+            
+            let sectionTitle = dataSource.sectionModels[indexPath.section].title
+            header.configure(title: sectionTitle)
+            
+            return header
+        }
+    )
+    
+    
     // MARK: - configureCollectionView
     private func configureCollectionView() {
-        collectionView.delegate = self
-        
         collectionView.register(CardCollectionViewCell.self, forCellWithReuseIdentifier: CardCollectionViewCell.identifier)
         
         // 리스트 컬렉션 뷰 추가
@@ -225,28 +236,45 @@ final class HomeViewController: UIViewController, View {
         // 헤더뷰 등록
         collectionView.register(HomeSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HomeSectionHeaderView.identifier)
     }
-    
-    // MARK: configureSearchBar
-    private func configureSearchBar() {
-        searchController.searchBar.delegate = self
-    }
-    
+
     
     // MARK: - Bind
     func bind(reactor: HomeReactor) {
         
-        // MARK: View -> Reactor
-        // viewDidLoad
+        // MARK: - View -> Reactor
+        // fetchData
         Observable.just(())
-            .map { Reactor.Action.viewDidLoad }
+            .map { Reactor.Action.fetchData }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         
-        // MARK: Reactor -> View
+        // search
+        guard let searchVC = searchController.searchResultsController as? SearchViewController,
+        let searchReactor = searchVC.reactor else { return }
+        
+        searchController.searchBar.rx.text.orEmpty
+            .filter { !$0.isEmpty }
+            .debounce(.milliseconds(800), scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .map { text in SearchReactor.Action.updateKeyword(text) }
+            .bind(to: searchReactor.action)
+            .disposed(by: disposeBag)
+        
+        
+        searchController.searchBar.rx.searchButtonClicked
+            .asDriver() // 메인스레드 보장
+            .drive(with: self) { owner, _ in
+                owner.searchController.searchBar.resignFirstResponder()
+            }
+            .disposed(by: disposeBag)
+        
+        
+        // MARK: - Reactor -> View
         // sections 상태 바인딩
         reactor.state
             .map(\.sections)
+            .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
             // 받아온 섹션 데이터를 통째로 dataSource에게 너미기
             .bind(to: collectionView.rx.items(dataSource: dataSource))
@@ -254,53 +282,19 @@ final class HomeViewController: UIViewController, View {
         
         // loading 상태 바인딩
         reactor.state
-            .map(\.isLoading)
+            .map { !$0.isLoading }
             .distinctUntilChanged() // 상태가 바뀔때만
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] isLoading in
-                self?.loadingLabel.isHidden = !isLoading
-            })
+            .bind(to: loadingLabel.rx.isHidden)
             .disposed(by: disposeBag)
         
         // error 상태 바인딩
-        reactor.state
-            .compactMap(\.errorMessage)
+        reactor.pulse(\.$errorMessage)
+            .compactMap { $0 }
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] message in
-                self?.showErrorAlert(message: message)
-                print("에러 메세지: \(message)")
-            })
+            .bind(with: self) { owner, message in
+                owner.showErrorAlert(message: message)
+            }
             .disposed(by: disposeBag)
     }
 }
-
-
-// MARK: - Extension
-
-// MARK: -- UICollectionView 델리게이트
-extension HomeViewController: UICollectionViewDelegate { }
-
-
-// MARK: -- UISearchBar 델리게이트
-extension HomeViewController: UISearchBarDelegate {
-    
-    // 검색버튼 눌렀을때
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        let keyword = searchBar.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "" // 양 끝 공백 삭제
-        
-        guard !keyword.isEmpty else { return } // 텅 빈 검색어 -> 함수 종료
-        
-        searchBar.resignFirstResponder() // 검색 버튼 누르면 키보드 내려감
-    }
-}
-
-
-@available(iOS 17.0, *)
-#Preview {
-    let networkManager = NetworkManager()
-    let repository = SearchRepository(networkManager: networkManager)
-    let useCase = FetchHomeContentUseCase(repository: repository)
-    let reactor = HomeReactor(fetchHomeContentsUseCase: useCase)
-    HomeViewController(reactor: reactor)
-}
-
