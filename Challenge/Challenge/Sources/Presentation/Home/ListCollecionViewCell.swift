@@ -10,7 +10,7 @@ import SnapKit
 import Then
 import Kingfisher
 
-final class ListCollectionViewCell: UICollectionViewCell {
+final class ListCollectionViewCell: UICollectionViewCell, PlayableUICell {
     
     static let identifier = "ListCollectionViewCell"
     
@@ -63,6 +63,17 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.backgroundColor = .systemGray5
     }
     
+    private let dimView = UIView().then {
+        $0.backgroundColor = .black.withAlphaComponent(0.3)
+        $0.isHidden = true
+    }
+    
+    private let playingIndicator = UIImageView().then {
+        $0.image = UIImage(systemName: "waveform")
+        $0.tintColor = .white
+        $0.isHidden = true
+    }
+    
     
     // MARK: - Init
     override init(frame: CGRect) {
@@ -93,6 +104,8 @@ final class ListCollectionViewCell: UICollectionViewCell {
         [imageView, rankLabel, textStackView, separatorView, ellipsisButton].forEach { containerView.addSubview($0) }
         
         [titleLabel, subtitleLabel].forEach { textStackView.addArrangedSubview($0) }
+        
+        [dimView, playingIndicator].forEach { imageView.addSubview($0) }
         
         containerView.snp.makeConstraints {
             $0.leading.equalToSuperview().inset(-10)
@@ -127,7 +140,23 @@ final class ListCollectionViewCell: UICollectionViewCell {
             $0.height.equalTo(0.7)
             $0.leading.equalTo(imageView.snp.trailing).offset(10)
         }
+        
+        dimView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        playingIndicator.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(15)
+        }
+        
     }
+    
+    
+    func updatePlayUI(isPlaying: Bool) {
+            playingIndicator.isHidden = !isPlaying
+            dimView.isHidden = !isPlaying
+        }
     
     
     // MARK: - Configure

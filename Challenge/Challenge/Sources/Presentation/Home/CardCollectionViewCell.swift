@@ -10,7 +10,7 @@ import SnapKit
 import Then
 import Kingfisher
 
-final class CardCollectionViewCell: UICollectionViewCell {
+final class CardCollectionViewCell: UICollectionViewCell, PlayableUICell {
     
     static let identifier = "CardCollectionViewCell"
     
@@ -44,6 +44,17 @@ final class CardCollectionViewCell: UICollectionViewCell {
         $0.alignment = .fill
     }
     
+    private let dimView = UIView().then {
+        $0.backgroundColor = .black.withAlphaComponent(0.3)
+        $0.isHidden = true
+    }
+    
+    private let playingIndicator = UIImageView().then {
+        $0.image = UIImage(systemName: "waveform")
+        $0.tintColor = .white
+        $0.isHidden = true
+    }
+    
     
     // MARK: - Init
     override init(frame: CGRect) {
@@ -73,8 +84,10 @@ final class CardCollectionViewCell: UICollectionViewCell {
         
         [imageView, textStackView].forEach { containerView.addSubview($0) }
         
-        [titleLabel, subtitleLabel].forEach { textStackView.addArrangedSubview($0) }
+        [dimView, playingIndicator].forEach { imageView.addSubview($0) }
         
+        [titleLabel, subtitleLabel].forEach { textStackView.addArrangedSubview($0) }
+                
         containerView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -89,7 +102,22 @@ final class CardCollectionViewCell: UICollectionViewCell {
             $0.leading.equalToSuperview()
             $0.trailing.equalToSuperview().inset(3)
         }
+        
+        dimView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        playingIndicator.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(20)
+        }
+        
     }
+    
+    func updatePlayUI(isPlaying: Bool) {
+            playingIndicator.isHidden = !isPlaying
+            dimView.isHidden = !isPlaying
+        }
     
     
     // MARK: - Configure
