@@ -104,14 +104,10 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
     private func setupUI() {
         contentView.addSubview(containerView)
         
-        [imageContainerView, titleLabel, subtitleLabel, descriptionLabel, muteButton].forEach {
+        [titleLabel, subtitleLabel, descriptionLabel, muteButton].forEach {
             containerView.addSubview($0) }
         
         containerView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
-        imageContainerView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
 
@@ -145,7 +141,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         playerLayer?.isHidden = true
         
         if let playerLayer = playerLayer {
-            imageContainerView.layer.addSublayer(playerLayer)
+            containerView.layer.insertSublayer(playerLayer, at: 0) // 맨 밑에 깔기
         }
     }
     
@@ -231,12 +227,8 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
                     guard let self = self else { return }
 
                     self.playerLayer?.isHidden = false
-//                    playerLayer?.frame = imageContainerView.bounds // 화면 크기 일치시키기
 
-                    print(self.playerLayer.debugDescription)
                     self.player?.play()
-                    print(self.player?.timeControlStatus.rawValue)
-                    print(self.playerLayer.debugDescription)
                 })
                 .disposed(by: disposeBag)
             }
