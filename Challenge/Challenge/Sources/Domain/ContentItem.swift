@@ -23,3 +23,6 @@ enum MediaType {
     case musicVideo
     case podcast
 }
+
+extension ContentItem: Equatable {}
+extension MediaType: Equatable {}

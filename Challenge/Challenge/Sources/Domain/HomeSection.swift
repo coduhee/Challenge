@@ -24,3 +24,6 @@ extension HomeSection: SectionModelType {
         self.items = items
     }
 }
+
+
+extension HomeSection: Equatable {}
