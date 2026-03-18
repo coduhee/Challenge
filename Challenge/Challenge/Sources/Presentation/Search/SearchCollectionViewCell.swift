@@ -76,7 +76,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        playerLayer?.frame = imageContainerView.bounds // 화면 크기 일치시키기
+        playerLayer?.frame = contentView.bounds // 화면 크기 일치시키기
     }
     
     
@@ -147,7 +147,6 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         if let playerLayer = playerLayer {
             imageContainerView.layer.addSublayer(playerLayer)
         }
-        
     }
     
     
@@ -208,7 +207,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         playerLayer?.isHidden = true
         
         if let previewURLString = item.previewURL,
-           let previewURL = URL(string: previewURLString) {
+            let previewURL = URL(string: previewURLString) {
             
             let newPlayItem = AVPlayerItem(url: previewURL)
             player?.replaceCurrentItem(with: newPlayItem)
@@ -227,10 +226,17 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
                 .compactMap { $0 }
                 .filter { $0 == .readyToPlay }
                 .take(1)
-                .observe(on: MainScheduler.instance)
+                .observe(on: MainScheduler.asyncInstance)
                 .subscribe(onNext: { [weak self] _ in
-                    self?.playerLayer?.isHidden = false
-                    self?.player?.play()
+                    guard let self = self else { return }
+
+                    self.playerLayer?.isHidden = false
+//                    playerLayer?.frame = imageContainerView.bounds // 화면 크기 일치시키기
+
+                    print(self.playerLayer.debugDescription)
+                    self.player?.play()
+                    print(self.player?.timeControlStatus.rawValue)
+                    print(self.playerLayer.debugDescription)
                 })
                 .disposed(by: disposeBag)
             }
