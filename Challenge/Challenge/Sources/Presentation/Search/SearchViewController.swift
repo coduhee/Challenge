@@ -313,18 +313,19 @@ final class SearchViewController: UIViewController, View {
                 // 소리 켜기
                 if let urlString = playingURL, let url = URL(string: urlString) {
                     AudioManager.shared.play(url: url)
-                }
-                
-                // 재생 이미지
-                for cell in self.collectionView.visibleCells {
-                    if let playableCell = cell as? PlayableUICell,
-                       let indexPath = self.collectionView.indexPath(for: cell),
-                       let item = self.dataSource[indexPath] as? ContentItem {
-                        
-                        let isPlaying = (item.previewURL == playingURL)
-                        playableCell.updatePlayUI(isPlaying: isPlaying)
+                    
+                    // 재생 이미지
+                    for cell in self.collectionView.visibleCells {
+                        if let playableCell = cell as? PlayableUICell,
+                           let indexPath = self.collectionView.indexPath(for: cell),
+                           let item = self.dataSource[indexPath] as? ContentItem {
+                            
+                            let isPlaying = (item.previewURL == playingURL)
+                            playableCell.updatePlayUI(isPlaying: isPlaying)
+                        }
                     }
                 }
+                
             })
             .disposed(by: disposeBag)
     }
