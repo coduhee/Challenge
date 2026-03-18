@@ -13,13 +13,13 @@ import Foundation
 enum APIEndpoint {
     static let baseURL = "https://itunes.apple.com/search"
     
-    static func search(term: String, media: String) -> URL? {
+    static func search(term: String, media: String, country: String, limit: String) -> URL? {
         var components = URLComponents(string: baseURL) // 인코딩 기능
         components?.queryItems = [
             URLQueryItem(name: "term", value: term),
             URLQueryItem(name: "media", value: media),
-            URLQueryItem(name: "country", value: "KR"),
-            URLQueryItem(name: "limit", value: "10")
+            URLQueryItem(name: "country", value: country),
+            URLQueryItem(name: "limit", value: limit)
         ]
         return components?.url
     }

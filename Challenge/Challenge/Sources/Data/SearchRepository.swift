@@ -19,18 +19,26 @@ final class SearchRepository: SearchRepositoryType {
     // MARK: - fetchContent
     func fetchContent(term: String, mediaType: MediaType) -> Single<[ContentItem]> {
         let mediaString: String
+        let countryString: String
+        let limitString: String
         
         switch mediaType {
         case .music:
             mediaString = "music"
+            countryString = "KR"
+            limitString = "10"
         case .musicVideo:
             mediaString = "musicVideo"
+            countryString = "US"
+            limitString = "1"
         case .podcast:
             mediaString = "podcast"
+            countryString = "KR"
+            limitString = "10"
         }
 
         
-        guard let url = APIEndpoint.search(term: term, media: mediaString) else {
+        guard let url = APIEndpoint.search(term: term, media: mediaString, country: countryString, limit: limitString) else {
             return .error(NetworkError.invalidURL)
         }
         
