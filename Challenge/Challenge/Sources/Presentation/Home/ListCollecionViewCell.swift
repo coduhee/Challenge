@@ -154,9 +154,9 @@ final class ListCollectionViewCell: UICollectionViewCell, PlayableUICell {
     
     
     func updatePlayUI(isPlaying: Bool) {
-            playingIndicator.isHidden = !isPlaying
-            dimView.isHidden = !isPlaying
-        }
+        playingIndicator.isHidden = !isPlaying
+        dimView.isHidden = !isPlaying
+    }
     
     
     // MARK: - Configure
@@ -166,7 +166,7 @@ final class ListCollectionViewCell: UICollectionViewCell, PlayableUICell {
         subtitleLabel.text = item.subtitle
         
         imageView.loadImage(from: item.imageURL)
-
+        
         separatorView.isHidden = hideSeparator
     }
 }

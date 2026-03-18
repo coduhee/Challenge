@@ -23,7 +23,7 @@ final class SearchUseCase {
         let podcast = repository.fetchContent(term: keyword, mediaType: .podcast)
         
         return Single.zip(musicVideo, music, podcast) { musicVideoItems, musicItems, podcastItems in
-                return [
+            return [
                 HomeSection(title: "🔥 지금 가장 핫한 \(keyword) M/V", items: musicVideoItems),
                 HomeSection(title: "\(keyword) 인기 차트", items: musicItems),
                 HomeSection(title: "\(keyword), 팟캐스트로 딥다이브", items: podcastItems)

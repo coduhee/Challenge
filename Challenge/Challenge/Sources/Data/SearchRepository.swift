@@ -36,7 +36,7 @@ final class SearchRepository: SearchRepositoryType {
             countryString = "KR"
             limitString = "10"
         }
-
+        
         
         guard let url = APIEndpoint.search(term: term, media: mediaString, country: countryString, limit: limitString) else {
             return .error(NetworkError.invalidURL)

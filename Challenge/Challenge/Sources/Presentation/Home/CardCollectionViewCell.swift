@@ -87,7 +87,7 @@ final class CardCollectionViewCell: UICollectionViewCell, PlayableUICell {
         [dimView, playingIndicator].forEach { imageView.addSubview($0) }
         
         [titleLabel, subtitleLabel].forEach { textStackView.addArrangedSubview($0) }
-                
+        
         containerView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -115,9 +115,9 @@ final class CardCollectionViewCell: UICollectionViewCell, PlayableUICell {
     }
     
     func updatePlayUI(isPlaying: Bool) {
-            playingIndicator.isHidden = !isPlaying
-            dimView.isHidden = !isPlaying
-        }
+        playingIndicator.isHidden = !isPlaying
+        dimView.isHidden = !isPlaying
+    }
     
     
     // MARK: - Configure

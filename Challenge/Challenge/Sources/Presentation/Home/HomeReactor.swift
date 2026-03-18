@@ -4,7 +4,7 @@
 //
 //  Created by 김주희 on 3/12/26.
 //
- 
+
 import Foundation
 import UIKit
 import RxSwift
@@ -111,7 +111,7 @@ private extension HomeReactor {
                 },
             
             // 3. 로딩 off
-                .just(.setLoading(false))
-        ])
+            .just(.setLoading(false))
+                                 ])
     }
 }

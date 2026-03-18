@@ -14,11 +14,11 @@ import ReactorKit
 import RxCocoa
 
 final class SearchCollectionViewCell: UICollectionViewCell, View {
-        
+    
     static let identifier = "SearchCollectionViewCell"
     
     var disposeBag = DisposeBag()
-
+    
     
     // MARK: - UI Components
     private let containerView = UIView().then {
@@ -83,7 +83,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
     // MARK: - Reuse
     override func prepareForReuse() {
         super.prepareForReuse()
-
+        
         titleLabel.text = nil
         subtitleLabel.text = nil
         descriptionLabel.text = nil
@@ -98,7 +98,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         player?.isMuted = true
         muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
     }
-
+    
     
     // MARK: - Layout
     private func setupUI() {
@@ -110,7 +110,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         containerView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-
+        
         subtitleLabel.snp.makeConstraints {
             $0.bottom.equalToSuperview().inset(20)
             $0.horizontalEdges.equalToSuperview().inset(22)
@@ -150,7 +150,6 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
     func bind(reactor: SearchCellReactor) {
         
         // MARK: View -> Reactor
-        
         // 음소거 버튼 Tap
         muteButton.rx.tap
             .map(\.self).map { Reactor.Action.toggleMute }
@@ -160,7 +159,6 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         
         
         // MARK: Reactor -> View
-        
         // 음소거 상태
         reactor.state
             .map { $0.isMuted }
@@ -190,7 +188,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
     func pauseVideo() {
         player?.pause()
     }
-
+    
     
     // MARK: - Configure
     func configure(with item: ContentItem) {
@@ -203,7 +201,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         playerLayer?.isHidden = true
         
         if let previewURLString = item.previewURL,
-            let previewURL = URL(string: previewURLString) {
+           let previewURL = URL(string: previewURLString) {
             
             let newPlayItem = AVPlayerItem(url: previewURL)
             player?.replaceCurrentItem(with: newPlayItem)
@@ -225,12 +223,12 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
                 .observe(on: MainScheduler.asyncInstance)
                 .subscribe(onNext: { [weak self] _ in
                     guard let self = self else { return }
-
+                    
                     self.playerLayer?.isHidden = false
-
+                    
                     self.player?.play()
                 })
                 .disposed(by: disposeBag)
-            }
+        }
     }
 }

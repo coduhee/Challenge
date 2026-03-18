@@ -275,9 +275,9 @@ final class SearchViewController: UIViewController, View {
     
     // MARK: - Bind
     func bind(reactor: SearchReactor) {
-                
+        
         // MARK: - View -> Reactor
-        // 컬레션 뷰 셀 클릭
+        // 컬렉션 뷰 셀 클릭
         collectionView.rx.modelSelected(ContentItem.self)
             .map { Reactor.Action.playMusic($0.previewURL) }
             .bind(to: reactor.action)
@@ -302,7 +302,6 @@ final class SearchViewController: UIViewController, View {
                 self?.showErrorAlert(message: message)
             })
             .disposed(by: disposeBag)
-        
         
         // 음악 재생 및 재생이미지
         reactor.state.map(\.playingURL)
