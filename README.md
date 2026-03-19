@@ -56,6 +56,9 @@ https://github.com/user-attachments/assets/a783dc54-61ac-45aa-b251-81e81dbed8de
 
 ## ⚠️ 메모리 누수 확인 
 
+개발 완료 후 **Xcode Memory Graph Debugger**와 **Instruments-Leaks**를 활용하여 메모리 이슈를 점검했습니다.
+
+
 ### Memory Graph Debugger
 * **클로저 순환 참조 해결**
 <img width="1476" height="833" alt="노트 2026  3  16" src="https://github.com/user-attachments/assets/50f4d95e-fee8-4c81-aee6-fc427a44b896" />
@@ -71,10 +74,16 @@ https://github.com/user-attachments/assets/a783dc54-61ac-45aa-b251-81e81dbed8de
 ## 🔥 자율 추가 구현 기능 및 트러블 슈팅
 
 과제 기본 요구사항 외에 앱의 완성도를 높이기 위해 다음과 같은 디테일을 추가했습니다.
+과제 기본 요구사항 외에 앱의 완성도를 높이고, 시각적인 즐거움을 주기 위해 다음과 같은 디테일을 추가 구현했습니다.
 
+* **뮤직비디오 자동 재생 및 다이내믹 UI 적용:** * 화면에 노출된 뮤직비디오 셀이 자동으로 재생되도록 구현하였으며, `AVPlayerItemDidPlayToEndTime` Notification을 활용해 영상 종료 시 끊김 없이 **무한 반복 재생**되도록 처리했습니다.
+  * 영상 하단에 **음소거(Mute) 토글 버튼**을 추가하여 사용자가 자유롭게 소리를 제어할 수 있도록 편의성을 높였습니다.
+  * 스크롤을 위로 당길 영상 영역이 부드럽게 확대되는 **바운스 애니메이션(Stretchy Header 효과)**을 적용하여 역동적인 조작감을 제공합니다.
+    
+* **음원 재생 상태 시각화 (Dim View & 파동 애니메이션):** * 사용자가 리스트에서 음원을 클릭하면, 해당 앨범 아트 위에 반투명한 **Dim View**가 덮이고 **파동(Waveform) 아이콘**을 추가하여 현재 재생 중인 곡을 직관적으로 알 수 있도록 구현했습니다. 
+  * 단순 UI 처리에 그치지 않고, Reactor의 State(`playingURL`)를 구독하여 스크롤 재사용(dequeue) 시점에도 애니메이션 상태가 완벽하게 유지되도록 설계했습니다.
 * **글로벌 오디오 매니저 (`AudioManager.swift`):** 싱글톤 객체를 생성하여 기존 곡 일시 정지 및 새로운 곡 재생 로직을 중앙 집중화했습니다.
-* **재생 상태 시각화 (Play Indicator):** Reactor의 State(`playingURL`)를 구독하고 스크롤 재사용(dequeue) 시점에도 상태를 동기화하여, 현재 재생 중인 음악의 셀에만 파동 애니메이션(Indicator)이 표시되도록 구현했습니다.
-* **데이터 예외 처리 (Error Pop-up):** 미리듣기(`previewURL`)가 제공되지 않는 콘텐츠를 탭 할 경우, Reactor단에서 상태를 검사하고 `@Pulse` 속성인 `errorMessage`를 방출하여 자연스럽게 에러 Alert이 노출되도록 구현했습니다. 
+* **데이터 예외 처리 (Error Pop-up):** 미리듣기(`previewURL`)가 제공되지 않는 콘텐츠를 탭 할 경우, Reactor단에서 상태를 검사하고 `@Pulse` 속성인 `errorMessage`를 방출하여 자연스럽게 에러 Alert이 노출되도록 구현했습니다.
 
 <br>
 
