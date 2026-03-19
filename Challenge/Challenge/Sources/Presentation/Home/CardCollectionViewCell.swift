@@ -75,6 +75,9 @@ final class CardCollectionViewCell: UICollectionViewCell, PlayableUICell {
         
         titleLabel.text = nil
         subtitleLabel.text = nil
+        
+        dimView.isHidden = true
+        playingIndicator.isHidden = true
     }
     
     
@@ -114,6 +117,7 @@ final class CardCollectionViewCell: UICollectionViewCell, PlayableUICell {
         
     }
     
+    // 음원 재생 여부 메서드
     func updatePlayUI(isPlaying: Bool) {
         playingIndicator.isHidden = !isPlaying
         dimView.isHidden = !isPlaying
