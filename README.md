@@ -58,7 +58,7 @@ https://github.com/user-attachments/assets/a783dc54-61ac-45aa-b251-81e81dbed8de
 
 ### Memory Graph Debugger
 * **클로저 순환 참조 해결**
-* <img width="1081" height="682" alt="노트 2026  3  16" src="https://github.com/user-attachments/assets/50f4d95e-fee8-4c81-aee6-fc427a44b896" />
+<img width="1476" height="833" alt="노트 2026  3  16" src="https://github.com/user-attachments/assets/50f4d95e-fee8-4c81-aee6-fc427a44b896" />
 
 
 ### Instruments(Leaks)
