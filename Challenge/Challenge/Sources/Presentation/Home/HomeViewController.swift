@@ -153,7 +153,7 @@ final class HomeViewController: UIViewController, View {
     private lazy var dataSource = RxCollectionViewSectionedReloadDataSource<HomeSection>(
         
         // MARK: - 기존 cellForItemAt
-        configureCell: { dataSource, collectionView, indexPath, item in
+        configureCell: { [weak self] dataSource, collectionView, indexPath, item in
             
             // MARK:  첫 번째 섹션(봄) 일 때 -> 리스트형 셀 사용
             if indexPath.section == 0 {
@@ -173,7 +173,7 @@ final class HomeViewController: UIViewController, View {
                 
                 cell.configure(with: item, rank: indexPath.item + 1, hideSeparator: shouldHideSeparator)
                 
-                cell.updatePlayUI(isPlaying: item.previewURL == self.reactor?.currentState.playingURL)
+                cell.updatePlayUI(isPlaying: item.previewURL == self?.reactor?.currentState.playingURL)
                 return cell
                 
                 // MARK: 나머지 섹션 (여름, 가을, 겨울) 일 때 -> 카드형 셀 사용
@@ -184,7 +184,7 @@ final class HomeViewController: UIViewController, View {
                 
                 cell.configure(with: item)
                 
-                cell.updatePlayUI(isPlaying: item.previewURL == self.reactor?.currentState.playingURL)
+                cell.updatePlayUI(isPlaying: item.previewURL == self?.reactor?.currentState.playingURL)
                 return cell
             }
         },

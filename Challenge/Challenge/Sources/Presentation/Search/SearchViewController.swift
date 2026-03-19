@@ -214,7 +214,7 @@ final class SearchViewController: UIViewController, View {
     private lazy var dataSource = RxCollectionViewSectionedReloadDataSource<HomeSection>(
         
         // MARK: - 기존 cellForItemAt
-        configureCell: { dataSource, collectionView, indexPath, item in
+        configureCell: { [weak self] dataSource, collectionView, indexPath, item in
             
             // MARK: 뮤직비디오 셀
             if indexPath.section == 0 {
@@ -239,7 +239,7 @@ final class SearchViewController: UIViewController, View {
                 // 둘중에 하나라도 해당되면 선 숨기기
                 let shouldHideSeparator = isThirdIncolumn || isLastItem
                 
-                cell.updatePlayUI(isPlaying: item.previewURL == self.reactor?.currentState.playingURL)
+                cell.updatePlayUI(isPlaying: item.previewURL == self?.reactor?.currentState.playingURL)
                 cell.configure(with: item, rank: indexPath.item + 1, hideSeparator: shouldHideSeparator)
                 return cell
             }
