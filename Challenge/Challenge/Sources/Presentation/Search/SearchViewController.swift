@@ -18,10 +18,11 @@ import AVFoundation
 final class SearchViewController: UIViewController, View {
     
     var disposeBag = DisposeBag()
-    
+    private var videoDisposeBag = DisposeBag()
     
     // MARK: - Properties
     private var sections: [HomeSection] = []
+    private let videoPlayer = AVPlayer()
     
     // MARK: - UI Components
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
@@ -62,23 +63,13 @@ final class SearchViewController: UIViewController, View {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        // 영상 일시정지
-        collectionView.visibleCells.forEach { cell in
-            if let videoCell = cell as? SearchCollectionViewCell {
-                videoCell.pauseVideo()
-            }
-        }
+        videoPlayer.pause()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        // 영상 다시재생
-        collectionView.visibleCells.forEach { cell in
-            if let videoCell = cell as? SearchCollectionViewCell {
-                videoCell.playVideo()
-            }
-        }
+        videoPlayer.play()
     }
     
     
@@ -89,9 +80,7 @@ final class SearchViewController: UIViewController, View {
         [collectionView, homeButton].forEach { view.addSubview($0) }
         
         collectionView.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.edges.equalToSuperview()
         }
         
         homeButton.snp.makeConstraints {
@@ -148,6 +137,7 @@ final class SearchViewController: UIViewController, View {
             })
             .disposed(by: disposeBag)
     }
+    
     
     // MARK: Create Compositional Layout
     func createLayout() -> UICollectionViewLayout {
@@ -215,15 +205,18 @@ final class SearchViewController: UIViewController, View {
         
         // MARK: - 기존 cellForItemAt
         configureCell: { [weak self] dataSource, collectionView, indexPath, item in
+            guard let self = self else { return UICollectionViewCell() }
             
             // MARK: 뮤직비디오 셀
             if indexPath.section == 0 {
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchCollectionViewCell.identifier, for: indexPath) as? SearchCollectionViewCell else {
                     return UICollectionViewCell()
                 }
-                
+                // 셀에 VC 플레이어 연결해주기
+                cell.attachPlayer(self.videoPlayer)
                 cell.reactor = SearchCellReactor(item: item)
                 return cell
+                
             } else {
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ListCollectionViewCell.identifier, for: indexPath) as? ListCollectionViewCell else {
                     return UICollectionViewCell()
@@ -239,7 +232,7 @@ final class SearchViewController: UIViewController, View {
                 // 둘중에 하나라도 해당되면 선 숨기기
                 let shouldHideSeparator = isThirdIncolumn || isLastItem
                 
-                cell.updatePlayUI(isPlaying: item.previewURL == self?.reactor?.currentState.playingURL)
+                cell.updatePlayUI(isPlaying: item.previewURL == self.reactor?.currentState.playingURL)
                 cell.configure(with: item, rank: indexPath.item + 1, hideSeparator: shouldHideSeparator)
                 return cell
             }
@@ -291,6 +284,12 @@ final class SearchViewController: UIViewController, View {
             .map(\.sections)
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
+            .do(onNext: { [weak self] sections in
+                if let firstSection = sections.first, let firstItem = firstSection.items.first,
+                   let urlString = firstItem.previewURL, let url = URL(string: urlString) {
+                    self?.setupAndPlayVideo(url: url)
+                }
+            })
             .bind(to: collectionView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
@@ -328,5 +327,38 @@ final class SearchViewController: UIViewController, View {
                 
             })
             .disposed(by: disposeBag)
+    }
+    
+    // 비디오 세팅, 재생, 무한반복 로직
+    private func setupAndPlayVideo(url: URL) {
+        // 기존 구독 해제
+        videoDisposeBag = DisposeBag()
+        
+        // 이미 같은영상을 재생 중이면 무시
+        if let currentAsset = videoPlayer.currentItem?.asset as? AVURLAsset, currentAsset.url == url {
+            return
+        }
+        
+        let playerItem = AVPlayerItem(url: url)
+        videoPlayer.replaceCurrentItem(with: playerItem)
+        
+        // 무한 반복
+        NotificationCenter.default.rx.notification(.AVPlayerItemDidPlayToEndTime, object: playerItem)
+            .subscribe(onNext: { [weak self] _ in
+                self?.videoPlayer.seek(to: .zero)
+                self?.videoPlayer.play()
+            })
+            .disposed(by: videoDisposeBag)
+        
+        // .readyToPlay일때 재생
+        playerItem.rx.observe(AVPlayerItem.Status.self, "status")
+            .compactMap { $0 }
+            .filter { $0 == .readyToPlay }
+            .take(1)
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] _ in
+                self?.videoPlayer.play()
+            })
+            .disposed(by: videoDisposeBag)
     }
 }

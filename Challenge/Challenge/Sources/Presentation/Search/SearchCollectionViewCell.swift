@@ -46,15 +46,6 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         $0.numberOfLines = 2
     }
     
-    private let imageContainerView = UIView().then {
-        $0.clipsToBounds = true
-    }
-    
-    // AVPlayer
-    private var player: AVPlayer?
-    private var playerLayer: AVPlayerLayer?
-    private var playerItem: AVPlayerItem?
-    
     private lazy var muteButton = UIButton().then {
         $0.setImage(UIImage(systemName: "speaker.wave.2.fill"), for: .normal)
         $0.tintColor = .white.withAlphaComponent(0.7)
@@ -62,6 +53,10 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         $0.layer.cornerRadius = 8
         $0.clipsToBounds = true
     }
+    
+    // AVPlayer
+    private weak var player: AVPlayer?
+    private var playerLayer: AVPlayerLayer?
     
     
     // MARK: - Init
@@ -76,7 +71,7 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        playerLayer?.frame = contentView.bounds // 화면 크기 일치시키기
+        playerLayer?.frame = contentView.bounds // 영상 크기 일치시키기
     }
     
     
@@ -89,14 +84,6 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
         descriptionLabel.text = nil
         
         disposeBag = DisposeBag()
-        
-        // 비디오 정지하고 메모리 청소
-        player?.pause()
-        player?.replaceCurrentItem(with: nil)
-        playerLayer?.isHidden = true
-        
-        player?.isMuted = true
-        muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
     }
     
     
@@ -131,19 +118,22 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
             $0.width.equalTo(45)
             $0.height.equalTo(37)
         }
-        
-        // Set MV
-        player = AVPlayer()
-        player?.isMuted = true
-        
-        playerLayer = AVPlayerLayer(player: player)
-        playerLayer?.videoGravity = .resizeAspectFill
-        playerLayer?.isHidden = true
-        
-        if let playerLayer = playerLayer {
-            containerView.layer.insertSublayer(playerLayer, at: 0) // 맨 밑에 깔기
-        }
     }
+    
+    
+    // MARK: - Player Method
+    func attachPlayer(_ player: AVPlayer) {
+            self.player = player
+            
+            if self.playerLayer == nil {
+                let layer = AVPlayerLayer(player: player)
+                layer.videoGravity = .resizeAspectFill
+                containerView.layer.insertSublayer(layer, at: 0) // 맨 밑에 깔기
+                self.playerLayer = layer
+            } else {
+                self.playerLayer?.player = player
+            }
+        }
     
     
     // MARK: - Bind
@@ -180,55 +170,11 @@ final class SearchCollectionViewCell: UICollectionViewCell, View {
             .disposed(by: disposeBag)
     }
     
-    // video Methods
-    func playVideo() {
-        player?.play()
-    }
-    
-    func pauseVideo() {
-        player?.pause()
-    }
-    
     
     // MARK: - Configure
     func configure(with item: ContentItem) {
         titleLabel.text = item.title
         descriptionLabel.text = item.description
         subtitleLabel.text = item.subtitle
-        
-        player?.pause()
-        player?.replaceCurrentItem(with: nil)
-        playerLayer?.isHidden = true
-        
-        if let previewURLString = item.previewURL,
-           let previewURL = URL(string: previewURLString) {
-            
-            let newPlayItem = AVPlayerItem(url: previewURL)
-            player?.replaceCurrentItem(with: newPlayItem)
-            
-            // MARK: 무한재생
-            // 영상 종료 시점 구독
-            NotificationCenter.default.rx.notification(.AVPlayerItemDidPlayToEndTime, object: newPlayItem)
-                .subscribe(onNext: { [weak self] _ in
-                    self?.player?.seek(to: .zero) // 영상 맨앞으로
-                    self?.player?.play()
-                })
-                .disposed(by: disposeBag)
-            
-            // MARK: ReadyToPlay일때 재생
-            newPlayItem.rx.observe(AVPlayerItem.Status.self, "status")
-                .compactMap { $0 }
-                .filter { $0 == .readyToPlay }
-                .take(1)
-                .observe(on: MainScheduler.asyncInstance)
-                .subscribe(onNext: { [weak self] _ in
-                    guard let self = self else { return }
-                    
-                    self.playerLayer?.isHidden = false
-                    
-                    self.player?.play()
-                })
-                .disposed(by: disposeBag)
-        }
     }
 }
