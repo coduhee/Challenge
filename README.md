@@ -54,13 +54,20 @@ https://github.com/user-attachments/assets/a783dc54-61ac-45aa-b251-81e81dbed8de
 
 <br>
 
-메모리 누수 없음
+## ⚠️ 메모리 누수 확인 
+
+### Memory Graph Debugger
+* **클로저 순환 참조 해결**
+* <img width="1081" height="682" alt="노트 2026  3  16" src="https://github.com/user-attachments/assets/50f4d95e-fee8-4c81-aee6-fc427a44b896" />
+
+
+### Instruments(Leaks)
+* **메모리 누수 없음**
 <img width="1476" height="833" alt="스크린샷 2026-03-19 오전 2 05 59" src="https://github.com/user-attachments/assets/9cbbd803-4239-4dda-9b5e-6429fdf52a3f" />
 
 
-
-
 <br>
+
 ## 🔥 자율 추가 구현 기능 및 트러블 슈팅
 
 과제 기본 요구사항 외에 앱의 완성도를 높이기 위해 다음과 같은 디테일을 추가했습니다.
